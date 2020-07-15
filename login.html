@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="api.js"></script>
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <div class="row justify-content-center">
+            <login></login>
+        </div>
+
+    </div>
+
+
+    <script type="text/x-template" id="login">
+        <div class="card mt-3 w-25">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h2>請先登入</h2>
+                    </div>                    
+                    <form>
+                        <div class="form-group">
+                          <label for="inputEamil">Email address</label>
+                          <input type="email" v-model="email" class="form-control" id="inputEamil" aria-describedby="emailHelp" placeholder="Enter email">                          
+                        </div>
+                        <div class="form-group">
+                          <label for="inputPassword">Password</label>
+                          <input type="password" v-model="password" class="form-control" id="inputPassword" placeholder="Password">
+                        </div>
+                                            
+                        <button type="button" class="btn btn-primary" @click="login">登入</button>
+                        
+                        <div class="alert mt-3 text-center" :class="{'alert-success': is_auth_success, 'alert-danger': !is_auth_success}" role="alert">
+                            {{ auth_state }}
+                        </div>
+                        
+                      </form>
+                </div>
+        </div>
+    </script>
+
+
+    <script type="module">
+        import { apiUserLogin } from "./api.js";
+
+        Vue.component('login', {
+            template: "#login",
+            data() {
+                return {
+                    email: "",
+                    password: "",
+                    token: "",
+                    expired: 0,
+                    auth_state: "尚未登入",
+                    is_auth_success: false,                                        
+                }
+            },
+            methods: {
+                login() {
+                    console.log(this.email, this.password);
+                    if(this.email === "" || this.password === ""){
+                        return ;
+                    }
+
+                    apiUserLogin({
+                        email: this.email,
+                        password: this.password,
+                    }).then(res => {
+                        console.log(res);
+                        this.token = res.data.token;
+                        this.expired = res.data.expired;
+                        document.cookie = `hexschool=${this.token}; expires=${new Date(this.expired * 1000)}`;
+
+                        this.is_auth_success = true;
+                        this.auth_state = "成功登入";
+
+                    }).catch(err => {
+                        console.log(err);
+
+                        this.is_auth_success = false;
+                        this.auth_state = "登入失敗";
+                    });
+                },
+                
+            },
+        });
+
+        var app = new Vue({
+            el: "#app",
+            data: {
+                text: "Hi",
+            }
+        });
+    </script>
+</body>
+
+</html>
