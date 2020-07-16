@@ -24,9 +24,27 @@
 
 <body>
     <div id="app" class="container mt-5">
-        <products :products="products" v-if="isProductLoad"></products>
+        <products :products="curr_products" v-if="isProductLoad"></products>
+        <pagination :pagi_data="pagination" v-if="isProductLoad" @upate-currpage="updateCurrentProducts"></pagination>
 
     </div>
+
+    <!-- pagination -->
+    <script type="text/x-template" id="pagination">
+        <nav aria-label="...">
+            <ul class="pagination">
+              <li class="page-item" :class="{disabled: curr_page === 1}" @click="update_curr_page('previous')">
+                <a class="page-link" href="#" aria-disabled="true">Previous</a>
+              </li>
+
+              <li class="page-item" :class="{active: curr_page === (index+1)}" v-for="(item, index) in page_index_list" :key="item" @click="update_curr_page(item)"><a class="page-link">{{ item }}</a></li>
+
+              <li class="page-item" :class="{disabled: curr_page === page_index_list.length}" @click="update_curr_page('next')">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+    </script>
 
     <!-- product list -->
     <script type="text/x-template" id="products">
@@ -42,7 +60,7 @@
             </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, key) in products_copy" :key="item.title">
+                <tr v-for="(item, key) in products" :key="item.title">
                     <td>{{ item.category }}</td>
                     <td>{{ item.title }}</td>
                     <td>{{ item.origin_price }}</td>
@@ -69,6 +87,45 @@
 
     <script type="module">
 
+        Vue.prototype.$bus = new Vue();
+
+        Vue.component('pagination', {
+            template: "#pagination",
+            props: {
+                pagi_data: Object,
+            },
+            data(){
+                return {
+                    page_index_list: [],
+                    curr_page: this.pagi_data.current_page,
+                }
+            },
+            created(){
+                for(let i=0; i<this.pagi_data.total_pages; ++i){
+                    this.page_index_list.push((i+1));
+                }                
+            },
+            methods: {
+                update_curr_page(operation){
+                    if(operation === "previous" && this.curr_page > 1){
+                        this.curr_page -= 1;
+                    }
+                    else if(operation === "next" && this.curr_page < this.page_index_list.length){
+                        this.curr_page += 1;
+                    }
+                    else if(this.page_index_list.includes(operation)){
+                        this.curr_page = operation;
+                    }
+                    else{
+                        return ;
+                    }
+                    // 父子溝通不需透過 $bus !!!
+                    this.$emit('upate-currpage', this.curr_page);
+                }
+            }
+        });
+
+
         Vue.component('products', {
             template: "#products",
             props: {
@@ -76,7 +133,7 @@
             },
             data() {
                 return {
-                    products_copy: this.products,
+                    // products_copy: this.products,
                     tempProduct: {},
                 }
             },
@@ -87,9 +144,11 @@
             data: {
                 token: "",
                 products: [],
+                curr_products: [],
                 uuid: "83e5dddb-dc92-4272-9ddd-488cfb6ae1e0",
                 apiPath: "https://course-ec-api.hexschool.io/",
                 isProductLoad: false,
+                pagination: {},
             },
             created() {
                 this.getProducts();
@@ -109,14 +168,32 @@
                         .then(function (res) {
                             // handle success
                             console.log(res);
-                            vm.products = res.data.data;
+                            
+                            vm.pagination = res.data.meta.pagination;                            
+                            vm.pagination.per_page = 1;
+                            // vm.pagination.total_pages = 3;
+
+                            let res_products = res.data.data;                            
+    
+                            while(res_products.length) {
+                                vm.products.push(res_products.splice(0, vm.pagination.per_page));
+                            }
+
+                            vm.pagination.total_pages = vm.products.length;
+                            console.log(vm.pagination);
+                            
+                            vm.curr_products = vm.products[vm.pagination.current_page-1];
                             vm.isProductLoad = true;
+
                         })
                         .catch(function (error) {
                             // handle error
                             console.log(error);
                         });
                 },
+                updateCurrentProducts(curr_page) {
+                    this.curr_products = this.products[curr_page-1];
+                }
             }
         });
     </script>
