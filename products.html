@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="api.js"></script>
+</head>
+
+<body>
+    <div id="app" class="container mt-5">
+        <products :products="products" v-if="isProductLoad"></products>
+
+    </div>
+
+    <!-- product list -->
+    <script type="text/x-template" id="products">
+        <table class="table mt-4">
+            <thead>
+            <tr>
+                <th scope="col">分類</th>
+                <th scope="col">產品名稱</th>
+                <th scope="col">原價</th>
+                <th scope="col">售價</th>
+                <th scope="col">是否啟用</th>
+                <th scope="col">編輯</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, key) in products_copy" :key="item.title">
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.origin_price }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>
+                        <span v-if="item.enabled" class="text-success">啟用</span>
+                        <span v-else>未啟用</span>
+                    </td>
+                    <td>
+                        <!-- 合再一起的元件，通常都是 xxx-group ( ex: btn-group, list-group ) -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-primary" @click="openModal('update', item)">編輯</button>
+                            <button type="button" class="btn btn-outline-danger"
+                                @click="openModal('delete', item)">刪除</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </script>
+
+
+
+    <script type="module">
+
+        Vue.component('products', {
+            template: "#products",
+            props: {
+                products: Array,
+            },
+            data() {
+                return {
+                    products_copy: this.products,
+                    tempProduct: {},
+                }
+            },
+        });
+
+        var app = new Vue({
+            el: "#app",
+            data: {
+                token: "",
+                products: [],
+                uuid: "83e5dddb-dc92-4272-9ddd-488cfb6ae1e0",
+                apiPath: "https://course-ec-api.hexschool.io/",
+                isProductLoad: false,
+            },
+            created() {
+                this.getProducts();
+            },
+            methods: {
+                getProducts() {
+
+                    this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexschool\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+                    axios.defaults.headers['Authorization'] = `Bearer ${this.token}`;
+
+                    let api = `${this.apiPath}api/${this.uuid}/admin/ec/products`;
+
+                    let vm = this;
+
+                    axios.get(api)
+                        .then(function (res) {
+                            // handle success
+                            console.log(res);
+                            vm.products = res.data.data;
+                            vm.isProductLoad = true;
+                        })
+                        .catch(function (error) {
+                            // handle error
+                            console.log(error);
+                        });
+                },
+            }
+        });
+    </script>
+</body>
+
+</html>
