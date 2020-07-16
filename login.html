@@ -92,6 +92,7 @@
 
                         this.is_auth_success = true;
                         this.auth_state = "成功登入";
+                        window.location.href = '/products.html'; //relative to domain
 
                     }).catch(err => {
                         console.log(err);
