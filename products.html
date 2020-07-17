@@ -25,6 +25,9 @@
 <body>
     <div id="app" class="container mt-5">
         <button type="button" @click="test">Test Component</button>
+        <div class="mt-4 text-right">
+            <button type="button" class="btn btn-primary" @click="openModal('create')">建立新產品</button>
+        </div>
         <products :products="curr_products" v-if="isProductLoad" @delete-item="openModal" @update-item="openModal">
         </products>
         <pagination :pagi_data="pagination" :page_index_list="page_index_list" v-if="isProductLoad"
@@ -219,11 +222,13 @@
                     console.log('updateProduct: line-218');
                     console.log(this.temp_product);
 
+                    let uuid = '83e5dddb-dc92-4272-9ddd-488cfb6ae1e0';
+                    let apiPath = 'https://course-ec-api.hexschool.io/';
+
                     // update product
                     if (this.temp_product.id) {
                         // api
-                        let uuid = '83e5dddb-dc92-4272-9ddd-488cfb6ae1e0';
-                        let apiPath = 'https://course-ec-api.hexschool.io/';
+                        
                         let product_id = this.temp_product.id;
                         let api = `${apiPath}api/${uuid}/admin/ec/product/${product_id}`;
 
@@ -237,7 +242,25 @@
                                 console.log(err);
                             });
                     }
+                    else {
 
+                        let api = `${apiPath}api/${uuid}/admin/ec/product`;
+                        console.log("create");
+                        console.log(this.temp_product);
+
+                        // api format
+                        this.temp_product.imageUrl = [this.temp_product.imageUrl];
+
+                        let vm = this;                        
+                        axios.post(api, this.temp_product)
+                            .then(function (res) {
+                                console.log(res);
+                                $('#ProductModal').modal('hide');
+                                vm.$emit("update-products");
+                            }).catch(function (err) {
+                                console.log(err);
+                            });;
+                    }
                 }
             }
         });
@@ -321,10 +344,6 @@
                         case "update":
                             this.$emit("update-item", [operate, item]);
                             break;
-                        // case "create":
-                        //     this.tempProduct = {};
-                        //     $('#ProductModal').modal('show');
-                        //     break;
 
                         // 先觸發 model 元件，把要刪除的資料搬進去 tempProduct，最後再由 modal 的確認按鈕呼叫 delProduct 執行
                         case "delete":
@@ -403,14 +422,25 @@
                 },
                 openModal(para) {
 
-                    let operation = para[0];
-                    this.tempProduct = Object.assign({}, para[1]);
+                    let operation = "";
+                    if (typeof (para) === typeof ("")) {
+                        operation = para;
+                        this.tempProduct = {};
+                    }
+                    else if (typeof (para) === typeof ([])) {
+                        operation = para[0];
+                        this.tempProduct = Object.assign({}, para[1]);
+                    }
+
                     console.log("openModal");
                     console.log(this.tempProduct);
                     if (operation === "delete") {
                         $('#delProductModal').modal('show');
                     }
                     else if (operation === "update") {
+                        $('#ProductModal').modal('show');
+                    }
+                    else if (operation === "create") {
                         $('#ProductModal').modal('show');
                     }
                 },
