@@ -25,11 +25,102 @@
 <body>
     <div id="app" class="container mt-5">
         <button type="button" @click="test">Test Component</button>
-        <products :products="curr_products" v-if="isProductLoad" @delete-item="openModal"></products>
+        <products :products="curr_products" v-if="isProductLoad" @delete-item="openModal" @update-item="openModal">
+        </products>
         <pagination :pagi_data="pagination" :page_index_list="page_index_list" v-if="isProductLoad"
             @upate-currpage="updateCurrentProducts"></pagination>
         <delete-product-modal :temp_product="tempProduct" @update-products="getProducts"></delete-product-modal>
+        <product-modal :temp_product="tempProduct" @update-products="getProducts"></product-modal>
     </div>
+
+    <!-- Product Modal -->
+    <script type="text/x-template" id="productModal">
+        <div class="modal fade" id="ProductModal" tabindex="-1" role="dialog" aria-labelledby="ProductModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title" id="ProductModalLabel">建立新產品</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="image-url" class="col-form-label">貼上圖片網址</label>
+                                    <input v-model="temp_product.imageUrl" type="url" class="form-control" id="image-url"
+                                        placeholder="請貼上圖片網址">
+                                </div>
+                                <img class="img-fluid" :src="temp_product.imageUrl">
+                            </div>
+
+                            <div class="col-sm-8">
+                                <form>
+                                    <!-- form-group 可以讓不同元件在表單內取得最佳間距 -->
+                                    <div class="form-group">
+                                        <label for="title" class="col-form-label">標題</label>
+                                        <input v-model="temp_product.title" type="text" class="form-control" id="title"
+                                            placeholder="請輸入標題">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <label for="category" class="col-form-label">分類</label>
+                                            <input v-model="temp_product.category" type="text" class="form-control"
+                                                id="category" placeholder="請輸入分類">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="unit" class="col-form-label">單位</label>
+                                            <input v-model="temp_product.unit" type="text" class="form-control" id="unit"
+                                                placeholder="請輸入單位">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-6">
+                                            <label for="origin_price" class="col-form-label">原價</label>
+                                            <input v-model="temp_product.origin_price" type="text" class="form-control"
+                                                id="origin_price" placeholder="請輸入原價">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="price" class="col-form-label">售價</label>
+                                            <input v-model="temp_product.price" type="text" class="form-control"
+                                                id="price" placeholder="請輸入售價">
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="form-group">
+                                        <label for="description">產品描述</label>
+                                        <textarea v-model="temp_product.description" class="form-control"
+                                            id="description" rows="2" placeholder="請輸入產品描述"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="content">說明內容</label>
+                                        <textarea v-model="temp_product.content" class="form-control" id="content"
+                                            rows="2" placeholder="請輸入說明內容"></textarea>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="" id="enabled"
+                                            v-model="temp_product.enabled">
+                                        <label class="form-check-label" for="enabled">
+                                            是否啟用
+                                        </label>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" @click="updateProduct">確認</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
 
     <!-- Delete Product Modal -->
     <script type="text/x-template" id="delmodal">
@@ -118,6 +209,39 @@
 
         Vue.prototype.$bus = new Vue();
 
+        Vue.component('product-modal', {
+            template: "#productModal",
+            props: {
+                temp_product: Object,
+            },
+            methods: {
+                updateProduct() {
+                    console.log('updateProduct: line-218');
+                    console.log(this.temp_product);
+
+                    // update product
+                    if (this.temp_product.id) {
+                        // api
+                        let uuid = '83e5dddb-dc92-4272-9ddd-488cfb6ae1e0';
+                        let apiPath = 'https://course-ec-api.hexschool.io/';
+                        let product_id = this.temp_product.id;
+                        let api = `${apiPath}api/${uuid}/admin/ec/product/${product_id}`;
+
+                        let vm = this;
+                        axios.patch(api, this.temp_product)
+                            .then(function (res) {
+                                console.log(res);
+                                $('#ProductModal').modal('hide');
+                                vm.$emit("update-products");
+                            }).catch(function (err) {
+                                console.log(err);
+                            });
+                    }
+
+                }
+            }
+        });
+
         Vue.component('delete-product-modal', {
             template: "#delmodal",
             props: {
@@ -194,10 +318,9 @@
             methods: {
                 openModal(operate, item) {
                     switch (operate) {
-                        // case "update":
-                        //     $('#ProductModal').modal('show');
-                        //     this.tempProduct = Object.assign({}, item);
-                        //     break;
+                        case "update":
+                            this.$emit("update-item", [operate, item]);
+                            break;
                         // case "create":
                         //     this.tempProduct = {};
                         //     $('#ProductModal').modal('show');
@@ -231,7 +354,7 @@
                 this.getProducts();
             },
             methods: {
-                getProducts() {
+                getProducts(operation) {
 
                     this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexschool\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
@@ -244,6 +367,7 @@
                     axios.get(api)
                         .then(function (res) {
                             // handle success
+                            console.log('getProducts');
                             console.log(res);
 
                             vm.pagination = res.data.meta.pagination;
@@ -273,7 +397,7 @@
                         });
                 },
                 updateCurrentProducts(curr_page) {
-                    this.curr_products = this.products[curr_page-1];
+                    this.curr_products = this.products[curr_page - 1];
                 },
                 openModal(para) {
 
@@ -284,11 +408,15 @@
                     if (operation === "delete") {
                         $('#delProductModal').modal('show');
                     }
+                    else if (operation === "update") {
+                        $('#ProductModal').modal('show');
+                    }
                 },
                 test() {
                     console.log('test');
                     console.log(this.products);
                     console.log(this.pagination);
+                    $('#ProductModal').modal('show');
                 }
             }
         });
