@@ -92,7 +92,13 @@
 
                         this.is_auth_success = true;
                         this.auth_state = "成功登入";
-                        window.location.href = '/products.html'; //relative to domain
+                        console.log(window.location.href);
+
+                        // redirect to product page
+                        let pathname = window.location.pathname;
+                        let root_path = pathname.substring(0, pathname.lastIndexOf('/'));
+                        let products_path = root_path + '/products.html'
+                        window.location.href = products_path; //relative to domain                        
 
                     }).catch(err => {
                         console.log(err);
