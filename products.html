@@ -349,6 +349,7 @@
                 pagination: {},
                 tempProduct: {},
                 page_index_list: [],
+                curr_page: 1,
             },
             created() {
                 this.getProducts();
@@ -387,7 +388,7 @@
                                 vm.page_index_list.push((i + 1));
                             }
 
-                            vm.curr_products = vm.products[vm.pagination.current_page - 1];
+                            vm.curr_products = vm.products[vm.curr_page - 1];
                             vm.isProductLoad = true;
 
                         })
@@ -397,6 +398,7 @@
                         });
                 },
                 updateCurrentProducts(curr_page) {
+                    this.curr_page = curr_page;
                     this.curr_products = this.products[curr_page - 1];
                 },
                 openModal(para) {
