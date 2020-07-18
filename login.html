@@ -19,7 +19,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script type="module" src="api.js"></script>
 </head>
 
 <body>
@@ -60,7 +59,6 @@
 
 
     <script type="module">
-        import { apiUserLogin } from "./api.js";
 
         Vue.component('login', {
             template: "#login",
@@ -68,6 +66,7 @@
                 return {
                     email: "",
                     password: "",
+                    api: "https://course-ec-api.hexschool.io/api/auth/login",
                     token: "",
                     expired: 0,
                     auth_state: "尚未登入",
@@ -81,7 +80,7 @@
                         return ;
                     }
 
-                    apiUserLogin({
+                    axios.post(this.api, {
                         email: this.email,
                         password: this.password,
                     }).then(res => {
