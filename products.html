@@ -27,8 +27,8 @@
         <div class="mt-4 text-right">
             <button type="button" class="btn btn-primary" @click="openModal('create')">建立新產品</button>
         </div>
-        <products :products="curr_products" v-if="isProductLoad" @delete-item="openModal" @update-item="openModal">
-        </products>
+
+        <products :products="products" v-if="isProductLoad"></products>
 
         <pagination :page="pagination" v-if="isProductLoad" @update="getProducts"></pagination>
 
@@ -152,44 +152,6 @@
         </div>
     </script>
 
-    <!-- product list -->
-    <script type="text/x-template" id="products">
-        <table class="table mt-4">
-            <thead>
-            <tr>
-                <th scope="col">分類</th>
-                <th scope="col">產品名稱</th>
-                <th scope="col">原價</th>
-                <th scope="col">售價</th>
-                <th scope="col">是否啟用</th>
-                <th scope="col">編輯</th>
-            </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, key) in products" :key="item.title">
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.title }}</td>
-                    <td>{{ item.origin_price }}</td>
-                    <td>{{ item.price }}</td>
-                    <td>
-                        <span v-if="item.enabled" class="text-success">啟用</span>
-                        <span v-else>未啟用</span>
-                    </td>
-                    <td>
-                        <!-- 合再一起的元件，通常都是 xxx-group ( ex: btn-group, list-group ) -->
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline-primary" @click="openModal('update', item)">編輯</button>
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="openModal('delete', item)">刪除</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-    </script>
-
-
 
     <script type="module">
 
@@ -280,35 +242,9 @@
 
         Vue.component('pagination', pagination)
 
+        import products from "./products.js";
 
-        Vue.component('products', {
-            template: "#products",
-            props: {
-                products: Array,
-            },
-            data() {
-                return {
-                    // products_copy: this.products,
-                    tempProduct: {},
-                }
-            },
-            methods: {
-                openModal(operate, item) {
-                    switch (operate) {
-                        case "update":
-                            this.$emit("update-item", [operate, item]);
-                            break;
-
-                        // 先觸發 model 元件，把要刪除的資料搬進去 tempProduct，最後再由 modal 的確認按鈕呼叫 delProduct 執行
-                        case "delete":
-                            // $('#delProductModal').modal('show');
-                            // this.tempProduct = Object.assign({}, item);
-                            this.$emit("delete-item", [operate, item]);
-                            break;
-                    }
-                }
-            }
-        });
+        Vue.component('products', products);
 
         var app = new Vue({
             el: "#app",
