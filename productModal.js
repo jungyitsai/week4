@@ -88,16 +88,31 @@ export default {
     methods: {
         updateProduct() {
             console.log('updateProduct');
-            let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/product/${this.temp_product.id}`;
+            if (this.temp_product.id) {
+                let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/product/${this.temp_product.id}`;
+                axios.patch(api, this.temp_product)
+                    .then(function (res) {
+                        console.log(res);
+                        $('#ProductModal').modal('hide');
+                        vm.$emit('update');
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+            } else {
+                this.temp_product.imageUrl = [this.temp_product.imageUrl];
+                console.log(this.temp_product);
 
-            axios.patch(api, this.temp_product)
-                .then(function (res) {
-                    console.log(res);
-                    $('#ProductModal').modal('hide');
-                    vm.$emit('update');
-                }).catch(function (err){
-                    console.log(err);
-                });
+                let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/product`;
+                let vm = this;
+                axios.post(api, this.temp_product)
+                    .then(function (res) {
+                        console.log(res);
+                        $('#ProductModal').modal('hide');
+                        vm.$emit('update');
+                    }).catch(function (err){
+                        console.log(err);
+                    });
+            }
         }
     }
 }
