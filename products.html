@@ -34,154 +34,17 @@
 
         <delete-product-modal :api="api" :temp_product="tempProduct" @update="getProducts"></delete-product-modal>
 
-        <product-modal :temp_product="tempProduct" @update-products="getProducts"></product-modal>
+        <product-modal :api="api" :temp_product="tempProduct" @update="getProducts"></product-modal>
     </div>
-
-    <!-- Product Modal -->
-    <script type="text/x-template" id="productModal">
-        <div class="modal fade" id="ProductModal" tabindex="-1" role="dialog" aria-labelledby="ProductModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="ProductModalLabel">建立新產品</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-sm-4">
-                                <div class="form-group">
-                                    <label for="image-url" class="col-form-label">貼上圖片網址</label>
-                                    <input v-model="temp_product.imageUrl" type="url" class="form-control" id="image-url"
-                                        placeholder="請貼上圖片網址">
-                                </div>
-                                <img class="img-fluid" :src="temp_product.imageUrl">
-                            </div>
-
-                            <div class="col-sm-8">
-                                <form>
-                                    <!-- form-group 可以讓不同元件在表單內取得最佳間距 -->
-                                    <div class="form-group">
-                                        <label for="title" class="col-form-label">標題</label>
-                                        <input v-model="temp_product.title" type="text" class="form-control" id="title"
-                                            placeholder="請輸入標題">
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-md-6">
-                                            <label for="category" class="col-form-label">分類</label>
-                                            <input v-model="temp_product.category" type="text" class="form-control"
-                                                id="category" placeholder="請輸入分類">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="unit" class="col-form-label">單位</label>
-                                            <input v-model="temp_product.unit" type="text" class="form-control" id="unit"
-                                                placeholder="請輸入單位">
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-md-6">
-                                            <label for="origin_price" class="col-form-label">原價</label>
-                                            <input v-model="temp_product.origin_price" type="text" class="form-control"
-                                                id="origin_price" placeholder="請輸入原價">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="price" class="col-form-label">售價</label>
-                                            <input v-model="temp_product.price" type="text" class="form-control"
-                                                id="price" placeholder="請輸入售價">
-                                        </div>
-                                    </div>
-                                    <hr>
-                                    <div class="form-group">
-                                        <label for="description">產品描述</label>
-                                        <textarea v-model="temp_product.description" class="form-control"
-                                            id="description" rows="2" placeholder="請輸入產品描述"></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="content">說明內容</label>
-                                        <textarea v-model="temp_product.content" class="form-control" id="content"
-                                            rows="2" placeholder="請輸入說明內容"></textarea>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="enabled"
-                                            v-model="temp_product.enabled">
-                                        <label class="form-check-label" for="enabled">
-                                            是否啟用
-                                        </label>
-                                    </div>
-                                </form>
-                            </div>
-
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
-                        <button type="button" class="btn btn-primary" @click="updateProduct">確認</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
 
 
     <script type="module">
 
         Vue.prototype.$bus = new Vue();
 
-        Vue.component('product-modal', {
-            template: "#productModal",
-            props: {
-                temp_product: Object,
-            },
-            methods: {
-                updateProduct() {
-                    console.log('updateProduct: line-218');
-                    console.log(this.temp_product);
+        import productModal from "./productModal.js";
 
-                    let uuid = '83e5dddb-dc92-4272-9ddd-488cfb6ae1e0';
-                    let apiPath = 'https://course-ec-api.hexschool.io/';
-
-                    // update product
-                    if (this.temp_product.id) {
-                        // api
-                        
-                        let product_id = this.temp_product.id;
-                        let api = `${apiPath}api/${uuid}/admin/ec/product/${product_id}`;
-
-                        let vm = this;
-                        axios.patch(api, this.temp_product)
-                            .then(function (res) {
-                                console.log(res);
-                                $('#ProductModal').modal('hide');
-                                vm.$emit("update-products");
-                            }).catch(function (err) {
-                                console.log(err);
-                            });
-                    }
-                    else {
-
-                        let api = `${apiPath}api/${uuid}/admin/ec/product`;
-                        console.log("create");
-                        console.log(this.temp_product);
-
-                        // api format
-                        this.temp_product.imageUrl = [this.temp_product.imageUrl];
-
-                        let vm = this;                        
-                        axios.post(api, this.temp_product)
-                            .then(function (res) {
-                                console.log(res);
-                                $('#ProductModal').modal('hide');
-                                vm.$emit("update-products");
-                            }).catch(function (err) {
-                                console.log(err);
-                            });;
-                    }
-                }
-            }
-        });
+        Vue.component('product-modal', productModal);
 
         import deleteModal from "./deleteModal.js";
 
@@ -198,7 +61,7 @@
         var app = new Vue({
             el: "#app",
             data: {
-                api: {                                        
+                api: {
                     apiPath: "https://course-ec-api.hexschool.io/",
                     uuid: "83e5dddb-dc92-4272-9ddd-488cfb6ae1e0",
                     token: "",
@@ -209,17 +72,17 @@
                 tempProduct: {},
             },
             created() {
-                
+
                 // cookie 初期設定一次就可以了
                 this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexschool\s*\=\s*([^;]*).*$)|^.*$/, "$1");
                 axios.defaults.headers['Authorization'] = `Bearer ${this.token}`;
-                
+
                 this.getProducts();
             },
             methods: {
                 getProducts(page_num = 1) {
 
-                   console.log("getProducts", page_num);
+                    console.log("getProducts", page_num);
 
                     let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/products?page=${page_num}`;
 
@@ -241,14 +104,32 @@
                             console.log(error);
                         });
                 },
-                openModal(para){
+                openModal(para) {
                     console.log(para);
                     let operation = para[0];
                     this.tempProduct = Object.assign({}, para[1]);
                     if(operation === "delete"){
                         $('#delProductModal').modal('show');
                     }
-                },             
+                    else if (operation === "update") {
+                        let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/product/${this.tempProduct.id}`;
+                        let vm = this;
+                        axios.get(api)
+                            .then(function (res) {
+                                // handle success
+                                console.log('getSingleProduct');
+                                console.log(res);
+                                vm.tempProduct = Object.assign({}, res.data.data);
+                                $('#ProductModal').modal('show');
+                            })
+                            .catch(function (error) {
+                                // handle error
+                                console.log(error);
+                            });
+
+                        $('#ProductModal').modal('show');
+                    }
+                },
                 test() {
                     console.log('test');
                     console.log(this.products);
