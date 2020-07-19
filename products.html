@@ -40,22 +40,15 @@
 
     <script type="module">
 
-        Vue.prototype.$bus = new Vue();
-
         import productModal from "./productModal.js";
-
-        Vue.component('product-modal', productModal);
-
         import deleteModal from "./deleteModal.js";
-
-        Vue.component('delete-product-modal', deleteModal);
-
         import pagination from "./pagination.js";
-
-        Vue.component('pagination', pagination)
-
         import products from "./products.js";
 
+
+        Vue.component('product-modal', productModal);
+        Vue.component('delete-product-modal', deleteModal);
+        Vue.component('pagination', pagination)
         Vue.component('products', products);
 
         var app = new Vue({
