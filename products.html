@@ -28,11 +28,12 @@
             <button type="button" class="btn btn-primary" @click="openModal('create')">建立新產品</button>
         </div>
 
-        <products :products="products" v-if="isProductLoad"></products>
+        <products :products="products" v-if="isProductLoad" @open_modal="openModal"></products>
 
         <pagination :page="pagination" v-if="isProductLoad" @update="getProducts"></pagination>
 
-        <delete-product-modal :temp_product="tempProduct" @update-products="getProducts"></delete-product-modal>
+        <delete-product-modal :api="api" :temp_product="tempProduct" @update="getProducts"></delete-product-modal>
+
         <product-modal :temp_product="tempProduct" @update-products="getProducts"></product-modal>
     </div>
 
@@ -125,34 +126,6 @@
     </script>
 
 
-    <!-- Delete Product Modal -->
-    <script type="text/x-template" id="delmodal">
-
-        <div class="modal fade" id="delProductModal" tabindex="-1" role="dialog" aria-labelledby="delProductModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="delProductModalLabel">刪除產品</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        是否刪除
-                        <strong class="text-danger">{{ temp_product.title }}</strong>
-                        (刪除後無法恢復)。
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
-                        <button type="button" class="btn btn-danger" @click="deleteProduct">確定刪除</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-
-
     <script type="module">
 
         Vue.prototype.$bus = new Vue();
@@ -210,33 +183,9 @@
             }
         });
 
-        Vue.component('delete-product-modal', {
-            template: "#delmodal",
-            props: {
-                temp_product: Object,
-            },
-            methods: {
-                deleteProduct() {
-                    // api
-                    let uuid = '83e5dddb-dc92-4272-9ddd-488cfb6ae1e0';
-                    let apiPath = 'https://course-ec-api.hexschool.io/';
-                    let id = this.temp_product.id;
-                    // after delete, call outer to re-render products
-                    let api = `${apiPath}api/${uuid}/admin/ec/product/${id}`;
-                    let vm = this;
+        import deleteModal from "./deleteModal.js";
 
-                    axios.delete(api)
-                        .then(function (res) {
-                            console.log(res);
-                            $('#delProductModal').modal('hide');
-                            vm.$emit("update-products");
-
-                        }).catch(function (err) {
-                            console.log(err);
-                        });
-                }
-            }
-        });
+        Vue.component('delete-product-modal', deleteModal);
 
         import pagination from "./pagination.js";
 
@@ -292,30 +241,14 @@
                             console.log(error);
                         });
                 },
-                openModal(para) {
-
-                    let operation = "";
-                    if (typeof (para) === typeof ("")) {
-                        operation = para;
-                        this.tempProduct = {};
-                    }
-                    else if (typeof (para) === typeof ([])) {
-                        operation = para[0];
-                        this.tempProduct = Object.assign({}, para[1]);
-                    }
-
-                    console.log("openModal");
-                    console.log(this.tempProduct);
-                    if (operation === "delete") {
+                openModal(para){
+                    console.log(para);
+                    let operation = para[0];
+                    this.tempProduct = Object.assign({}, para[1]);
+                    if(operation === "delete"){
                         $('#delProductModal').modal('show');
                     }
-                    else if (operation === "update") {
-                        $('#ProductModal').modal('show');
-                    }
-                    else if (operation === "create") {
-                        $('#ProductModal').modal('show');
-                    }
-                },
+                },             
                 test() {
                     console.log('test');
                     console.log(this.products);

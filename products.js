@@ -39,6 +39,8 @@ export default {
         }
     },
     methods: {
-
+        openModal(operation, item) {
+            this.$emit("open_modal", [operation, item]);
+        },
     }
 }
