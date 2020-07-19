@@ -249,28 +249,30 @@
         var app = new Vue({
             el: "#app",
             data: {
-                token: "",
+                api: {                                        
+                    apiPath: "https://course-ec-api.hexschool.io/",
+                    uuid: "83e5dddb-dc92-4272-9ddd-488cfb6ae1e0",
+                    token: "",
+                },
                 products: [],
-                curr_products: [],
-                uuid: "83e5dddb-dc92-4272-9ddd-488cfb6ae1e0",
-                apiPath: "https://course-ec-api.hexschool.io/",
                 isProductLoad: false,
                 pagination: {},
                 tempProduct: {},
-                page_index_list: [],
-                curr_page: 1,
             },
-            created() {                
+            created() {
+                
+                // cookie 初期設定一次就可以了
+                this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexschool\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                axios.defaults.headers['Authorization'] = `Bearer ${this.token}`;
+                
                 this.getProducts();
             },
             methods: {
-                getProducts(operation) {
+                getProducts(page_num = 1) {
 
-                    this.token = document.cookie.replace(/(?:(?:^|.*;\s*)hexschool\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+                   console.log("getProducts", page_num);
 
-                    axios.defaults.headers['Authorization'] = `Bearer ${this.token}`;
-
-                    let api = `${this.apiPath}api/${this.uuid}/admin/ec/products`;
+                    let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/products?page=${page_num}`;
 
                     let vm = this;
 
@@ -289,10 +291,6 @@
                             // handle error
                             console.log(error);
                         });
-                },
-                updateCurrentProducts(curr_page) {
-                    this.curr_page = curr_page;
-                    this.curr_products = this.products[curr_page - 1];
                 },
                 openModal(para) {
 
