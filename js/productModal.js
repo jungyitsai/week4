@@ -90,6 +90,7 @@ export default {
             console.log('updateProduct');
             if (this.temp_product.id) {
                 let api = `${this.api.apiPath}api/${this.api.uuid}/admin/ec/product/${this.temp_product.id}`;
+                let vm = this;
                 axios.patch(api, this.temp_product)
                     .then(function (res) {
                         console.log(res);
