@@ -28,9 +28,9 @@
             <button type="button" class="btn btn-primary" @click="openModal(['create', {}])">建立新產品</button>
         </div>
 
-        <products :products="products" v-if="isProductLoad" @open_modal="openModal"></products>
+        <products :products="products" @open_modal="openModal"></products>
 
-        <pagination :page="pagination" v-if="isProductLoad" @update="getProducts"></pagination>
+        <pagination :page="pagination" @update="getProducts"></pagination>
 
         <delete-product-modal :api="api" :temp_product="tempProduct" @update="getProducts"></delete-product-modal>
 
@@ -60,7 +60,6 @@
                     token: "",
                 },
                 products: [],
-                isProductLoad: false,
                 pagination: {},
                 tempProduct: {},
             },
@@ -89,7 +88,6 @@
 
                             vm.pagination = res.data.meta.pagination;
                             vm.products = res.data.data;
-                            vm.isProductLoad = true;
 
                         })
                         .catch(function (error) {

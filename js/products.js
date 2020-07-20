@@ -12,7 +12,7 @@ export default {
             </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, key) in products" :key="item.title">
+                <tr v-for="(item, key) in products" :key="key">
                     <td>{{ item.category }}</td>
                     <td>{{ item.title }}</td>
                     <td>{{ item.origin_price }}</td>
